@@ -42,6 +42,7 @@ class League(commands.Cog):
 			for role in top_two_roles:
 				str_for_role_embed += f'{role} ({top_two_roles[role]}%)\n'
 			embed.add_field(name='Top 2 Roles Played:', value=str_for_role_embed, inline=True)
+		embed.set_footer(text="SecretBot isn’t endorsed by Riot Games and doesn’t reflect the views \nor opinions of Riot Games or anyone officially involved in producing or \nmanaging League of Legends. League of Legends and Riot Games are \ntrademarks or registered trademarks of Riot Games, Inc. League of \nLegends © Riot Games, Inc.")
 		await ctx.message.channel.send(embed = embed)
 
 	def get_summoner_info(self, username):

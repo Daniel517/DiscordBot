@@ -12,6 +12,7 @@ class League(commands.Cog):
 
 	@commands.command()
 	async def league(self, ctx, username):
+		"""Returns data on a summoner. Given a summoner name, returns level, rank, top 5 champs played, top 2 roles played."""
 		embed = discord.Embed()
 		summoner_info = self.get_summoner_info(username)
 		if 'error' in summoner_info:

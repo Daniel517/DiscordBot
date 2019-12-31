@@ -2,7 +2,10 @@ import discord
 from discord.ext import commands
 import Credentials
 from apps.LeagueAPI import LeagueAPI as lapi
+from apps.LeagueImageCreator import LeagueImageCreator
 import requests
+import os
+import asyncio
 
 class League(commands.Cog):
 
@@ -47,49 +50,24 @@ class League(commands.Cog):
 	@commands.command()
 	async def live(self, ctx, username):
 		"""Returns data of live game if summoner is in one"""
-		embed = discord.Embed(colour=0x0fff00)
 		summoner_info = lapi.get_summoner_info(username)
 		if 'error' in summoner_info:
 			await ctx.send(summoner_info['error'])
 			return
 		elif summoner_info:
-			embed.set_author(name=f'{username} #{summoner_info["summonerLevel"]}', icon_url=f'http://ddragon.leagueoflegends.com/cdn/9.24.2/img/profileicon/{summoner_info["profileIconId"]}.png')
-		summoner_live_data = lapi.get_live_match(summoner_info['id'])
-		if 'error' in summoner_live_data:
-			await ctx.send(summoner_live_data['error'])
-			return
-		elif summoner_live_data:
-			embed.description = summoner_live_data['game_type']
-			blue_team_names = ''
-			red_team_names = ''
-			blue_team_champs = ''
-			red_team_champs = ''
-			for summoner in summoner_live_data['summoners']:
-				if summoner['team'] == 100:
-					blue_team_names += f'{summoner["name"]}\n'
-					blue_team_champs += f'{summoner["champ"]}\n'
-				else:
-					red_team_names += f'{summoner["name"]}\n'
-					red_team_champs += f'{summoner["champ"]}\n'
-			blue_team_bans = ''
-			red_team_bans = ''
-			if summoner_live_data['banned']:
-				for ban in summoner_live_data['banned']:
-					if ban['team'] == 100:
-						blue_team_bans += f'{ban["champ"]}\n'
-					else:
-						red_team_bans += f'{ban["champ"]}\n'
-			else:
-				blue_team_bans = 'Not\nAvailable'
-				red_team_bans = 'Not\nAvailable'
-			embed.add_field(name='Blue Team', value=blue_team_names, inline=True)
-			embed.add_field(name='Champ', value=blue_team_champs, inline=True)
-			embed.add_field(name='Bans', value=blue_team_bans, inline=True)
-			embed.add_field(name='Red Team', value=red_team_names, inline=True)
-			embed.add_field(name='Champ', value=red_team_champs, inline=True)
-			embed.add_field(name='Bans', value=red_team_bans, inline=True)
-		embed.set_footer(text="SecretBot isn’t endorsed by Riot Games and doesn’t reflect the views or opinions of Riot Games or anyone officially involved in producing or managing League of Legends. League of Legends and Riot Games are trademarks or registered trademarks of Riot Games, Inc. League of Legends © Riot Games, Inc.")
-		await ctx.message.channel.send(embed=embed)
-		
+			summoner_live_data = lapi.get_live_match_data(summoner_info['id'])
+			if 'error' in summoner_live_data:
+				await ctx.send(summoner_live_data['error'])
+				return
+			elif os.path.exists(f'./{summoner_live_data["game_id"]}.png'):
+				await ctx.message.channel.send(file = discord.File(f'./{summoner_live_data["game_id"]}.png', 'match.png'))
+			elif summoner_live_data:
+				image_path = LeagueImageCreator.get_match_image(summoner_live_data['game_id'], summoner_live_data['summoners'], summoner_live_data['banned_champs'])
+				await ctx.message.channel.send(file = discord.File(image_path, 'match.png'))
+				await asyncio.sleep(60)
+				os.remove(image_path)
+
+
+
 def setup(client):
 	client.add_cog(League(client))

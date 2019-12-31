@@ -10,7 +10,7 @@ class LeagueAPI():
 	response_queues = requests.get('http://static.developer.riotgames.com/docs/lol/queues.json')
 	response_game_modes = requests.get('http://static.developer.riotgames.com/docs/lol/gameModes.json')
 	response_champs = requests.get('http://ddragon.leagueoflegends.com/cdn/9.24.2/data/en_US/champion.json')
-	response_perks = requests.get('https://ddragon.leagueoflegends.com/cdn/9.24.2/data/en_US/runesReforged.json')
+	response_perks = requests.get('http://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/v1/perks.json')
 	response_summoner_spells = requests.get('http://ddragon.leagueoflegends.com/cdn/9.24.2/data/en_US/summoner.json')
 
 	def get_summoner_info(username):
@@ -22,38 +22,6 @@ class LeagueAPI():
 			return {'error' : f'Summoner "{username}" not found!'}
 		else:
 			print(f'Error getting summoner data, code: {summoner_data.status_code}')
-			return {'error' : 'An error occurred!'}
-
-	def get_rank_from_queue_id(summoner_id, queue_id):
-		summoner_rank = requests.get(f'{LeagueAPI.host}/lol/league/v4/entries/by-summoner/{summoner_id}', headers = LeagueAPI.headers)
-		queue_type = ''
-		if queue_id == 440:
-			queue_type = 'RANKED_FLEX_SR'
-		else:
-			queue_type = 'RANKED_SOLO_5x5'
-		if summoner_rank.status_code == 200:
-			for queue in summoner_rank.json():
-				if queue['queueType'] == queue_type:
-					return f'{queue["tier"].lower()}'
-
-
-	def get_summoner_rank_data(summoner_id):
-		summoner_rank = requests.get(f'{LeagueAPI.host}/lol/league/v4/entries/by-summoner/{summoner_id}', headers = LeagueAPI.headers)
-		if summoner_rank.status_code == 200:
-			ranked_data = []
-			for queue in summoner_rank.json():
-				queue_data = {}
-				if queue['queueType'] == 'RANKED_SOLO_5x5':
-					queue_data = {'queue' : 'Ranked Solo/Duo', 'rank' : queue['tier'] + ' ' + queue['rank']}
-				if queue['queueType'] == 'RANKED_FLEX_SR':
-					queue_data = {'queue' : 'Ranked Flex', 'rank' : queue['tier'] + ' ' + queue['rank']}
-				games_played = int(queue['wins']) + int(queue['losses'])
-				win_rate = int(queue['wins']) / games_played
-				queue_data.update({'games_played' : str(games_played), 'win_rate' : str(round(win_rate * 100))})
-				ranked_data.append(queue_data)
-			return ranked_data
-		else:
-			print(f'Error getting summoner rank data, code: {summoner_rank.status_code}')
 			return {'error' : 'An error occurred!'}
 
 	def get_summoner_data(account_id):
@@ -93,7 +61,15 @@ class LeagueAPI():
 		if summoner_live_data_response.status_code == 200:
 			summoner_live_data = summoner_live_data_response.json()
 			for summoner_data in summoner_live_data['participants']:
-				player_info = {'name' : summoner_data['summonerName'], 'rank' : LeagueAPI.get_rank_from_queue_id(summoner_data['summonerId'], summoner_live_data['gameQueueConfigId']), 'champ_name' : LeagueAPI.get_champ_from_id(str(summoner_data['championId'])), 'mastery_points' : LeagueAPI.get_mastery_points(summoner_data['summonerId'], summoner_data['championId']), 'spell_1' : summoner_data['spell1Id'], 'spell_2' : summoner_data['spell2Id'], 'team' : summoner_data['teamId']}
+				ranked_data = LeagueAPI.get_rank_from_queue_id(summoner_data['summonerId'], summoner_live_data['gameQueueConfigId'])
+				champ_name = LeagueAPI.get_champ_from_id(str(summoner_data['championId']))
+				mastery_points = LeagueAPI.get_mastery_points(summoner_data['summonerId'], summoner_data['championId'])
+				perks_info = []
+				for perk_id in summoner_data['perks']['perkIds']:
+					perks_info.append(LeagueAPI.get_perk_info_from_id(str(perk_id)))
+				spell_1 = LeagueAPI.get_summoner_spell_name_from_id(summoner_data['spell1Id'])
+				spell_2 = LeagueAPI.get_summoner_spell_name_from_id(summoner_data['spell2Id'])
+				player_info = {'name' : summoner_data['summonerName'], 'rank_data' : ranked_data, 'champ_name' : champ_name, 'mastery_points' : mastery_points, 'perks' : perks_info, 'spell_1' : spell_1, 'spell_2' : spell_2, 'team' : summoner_data['teamId']}
 				summoners.append(player_info)
 			for banned_champ_data in summoner_live_data['bannedChampions']:
 				banned_champ = {'champ' : LeagueAPI.get_champ_from_id(str(banned_champ_data['championId'])), 'team' : banned_champ_data['teamId'], 'turn_banned' : banned_champ_data['pickTurn']}
@@ -105,6 +81,40 @@ class LeagueAPI():
 		else:
 			print(f'Error getting summoner match data, code: {summoner_live_data_response.status_code}')
 			return {'error' : 'An error occurred!'}
+
+	def get_summoner_rank_data(summoner_id):
+		summoner_rank = requests.get(f'{LeagueAPI.host}/lol/league/v4/entries/by-summoner/{summoner_id}', headers = LeagueAPI.headers)
+		if summoner_rank.status_code == 200:
+			ranked_data = []
+			for queue in summoner_rank.json():
+				queue_data = {}
+				if queue['queueType'] == 'RANKED_SOLO_5x5':
+					queue_data = {'queue' : 'Ranked Solo/Duo', 'rank' : queue['tier'] + ' ' + queue['rank']}
+				if queue['queueType'] == 'RANKED_FLEX_SR':
+					queue_data = {'queue' : 'Ranked Flex', 'rank' : queue['tier'] + ' ' + queue['rank']}
+				games_played = int(queue['wins']) + int(queue['losses'])
+				win_rate = int(queue['wins']) / games_played
+				queue_data.update({'games_played' : str(games_played), 'win_rate' : str(round(win_rate * 100))})
+				ranked_data.append(queue_data)
+			return ranked_data
+		else:
+			print(f'Error getting summoner rank data, code: {summoner_rank.status_code}')
+			return {'error' : 'An error occurred!'}
+
+	def get_rank_from_queue_id(summoner_id, queue_id):
+		summoner_rank = requests.get(f'{LeagueAPI.host}/lol/league/v4/entries/by-summoner/{summoner_id}', headers = LeagueAPI.headers)
+		queue_type = ''
+		if queue_id == 440:
+			queue_type = 'RANKED_FLEX_SR'
+		else:
+			queue_type = 'RANKED_SOLO_5x5'
+		if summoner_rank.status_code == 200:
+			for queue in summoner_rank.json():
+				if queue['queueType'] == queue_type:
+					win_rate = round((queue['wins'] / (queue['wins'] + queue['losses'])) * 100)
+					return {'rank' : queue['tier'].lower(), 'win_rate' : win_rate}
+		else:
+			return {'error' : 'Error getting ranked data'}
 
 	def get_champ_from_id(champ_id: str):
 		if LeagueAPI.response_champs.status_code == 200:
@@ -147,19 +157,29 @@ class LeagueAPI():
 		else:
 			return 0
 
+	#Returns dictionary containing id, name, and icon url route for a given perk id
+	def get_perk_info_from_id(perk_id):
+		if LeagueAPI.response_perks.status_code == 200:
+			for perk in LeagueAPI.response_perks.json():
+				if int(perk['id']) == int(perk_id):
+					perk_path = perk['iconPath'].split('perk-images/')[1]
+					return {'perk_id' : perk_id, 'perk_name' : perk['name'], 'perk_icon_url' : perk_path}
+		else:
+			print(f'Error getting perk info, code: {response_perks.status_code}')
+			return {'error' : 'Error getting perk info'}
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+	def get_summoner_spell_name_from_id(spell_id):
+		if LeagueAPI.response_summoner_spells.status_code == 200:
+			spells = LeagueAPI.response_summoner_spells.json()
+			for spell_name, spell_data_dict in spells['data'].items():
+				if spell_data_dict['key'] == str(spell_id):
+					return spell_data_dict['id']
+						
+	# def get_summoner_spell_name_from_id(spell_id):
+	# 	if LeagueAPI.response_summoner_spells.status_code == 200:
+	# 		spells = LeagueAPI.response_summoner_spells.json()
+	# 		for spell_name, spell_data_dict in spells['data'].items():
+	# 			for key, value in spell_data_dict.items():
+	# 				if key == 'key' and value == str(spell_id):
+	# 					return spell_data_dict['id']
+	# 					

@@ -3,6 +3,9 @@ import requests
 
 class LeagueImageCreator():
 
+	perk_host = 'http://ddragon.leagueoflegends.com/cdn/img/perk-images/'
+	summoner_spell_host = 'http://ddragon.leagueoflegends.com/cdn/9.24.2/img/spell/'
+
 	def get_match_image(game_id, summoners, bans):
 		blue_img_coords = 140
 		red_img_coords = 140
@@ -26,12 +29,13 @@ class LeagueImageCreator():
 		summoner_name = summoner['name']
 		champ = summoner['champ_name']
 		mastery = summoner['mastery_points']
+		rank_data = summoner['rank_data']
 		color = '#00c4ff' if summoner['team'] == 100 else '#ff0000'
 		img = Image.new('RGBA', (248, 505), (255, 255, 0, 0))
 		#Check if font folder is available
 		try: 
 			font_summoner_name = ImageFont.truetype('open-sans/OpenSans-Regular.ttf', 28)
-			font_summoner_data = ImageFont.truetype('open-sans/OpenSans-Regular.ttf', 18)
+			font_summoner_data = ImageFont.truetype('open-sans/OpenSans-Bold.ttf', 18)
 		except:
 			font_summoner_name = ImageFont.load_default()
 			font_summoner_data = ImageFont.load_default()
@@ -43,7 +47,7 @@ class LeagueImageCreator():
 			banner_img = banner_img.crop((0, 323, banner_img.size[0], 828))
 			img.paste(banner_img, (0, 0))
 		#Check if response of trim for summoner's rank is valid
-		trim_response = requests.get(f'http://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/assets/regalia/banners/trims/trim_{summoner["rank"]}.png', stream=True)
+		trim_response = requests.get(f'http://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/assets/regalia/banners/trims/trim_{summoner["rank_data"]["rank"]}.png', stream=True)
 		if trim_response.status_code == 200:
 			trim_img = Image.open(trim_response.raw)
 			trim_img = trim_img.resize((248, 124))
@@ -56,11 +60,75 @@ class LeagueImageCreator():
 		champ_response = requests.get(f'http://ddragon.leagueoflegends.com/cdn/9.24.2/img/champion/{champ}.png', stream=True)
 		if champ_response.status_code == 200:
 			champ_img = Image.open(champ_response.raw)
-			champ_img = champ_img.resize((228, 228))
-			img.paste(champ_img, (10, 57))
+			champ_img = champ_img.resize((127, 127))
+			img.paste(champ_img, (61, 54))
 		#Adds Mastery Points label and data to image
-		title_text = ImageDraw.Draw(img)
-		title_text.text((30, 293), 'Mastery:', fill='#FFE553', align='center', font=font_summoner_data)
-		data_text = ImageDraw.Draw(img)
-		data_text.text((150, 293), f'{mastery}', fill='#D3D3D3', align='center', font=font_summoner_data)
+		mastery_title_text = ImageDraw.Draw(img)
+		mastery_title_text.text((32, 200), 'Mastery:', fill='#FFE553', align='center', font=font_summoner_data)
+		mastery_data_text = ImageDraw.Draw(img)
+		mastery_font_place = 185 - (font_summoner_data.getsize(f'{mastery}')[0] / 2)
+		mastery_data_text.text((mastery_font_place, 200), f'{mastery}', fill='#D3D3D3', align='center', font=font_summoner_data)
+		#Adds Winrate label and data to image
+		win_rate_title_text = ImageDraw.Draw(img)
+		win_rate_title_text.text((32, 239), 'Winrate:', fill='#FFE553', align='center', font=font_summoner_data)
+		win_rate_data_text = ImageDraw.Draw(img)
+		win_rate_font_place = 185 - (font_summoner_data.getsize(f'{summoner["rank_data"]["win_rate"]}%')[0] / 2)
+		win_rate_data_text.text((win_rate_font_place, 239), f'{summoner["rank_data"]["win_rate"]}%', fill='#D3D3D3', align='center', font=font_summoner_data)
+		first_row_perks_coords = 26
+		perks = summoner['perks']
+		for x in range(4):
+			perk_url = perks[x]['perk_icon_url']
+			perk_response = requests.get(f'{LeagueImageCreator.perk_host}{perk_url}', stream=True)
+			if perk_response.status_code == 200:
+				perk_img = Image.open(perk_response.raw)
+				perk_img = perk_img.resize((37, 37))
+				img.paste(perk_img, (first_row_perks_coords, 284), perk_img.convert('RGBA'))
+				first_row_perks_coords += 53
+		second_row_perks_coords = 26
+		for x in range(4, 6):
+			perk_url = perks[x]['perk_icon_url']
+			perk_response = requests.get(f'{LeagueImageCreator.perk_host}{perk_url}', stream=True)
+			if perk_response.status_code == 200:
+				perk_img = Image.open(perk_response.raw)
+				perk_img = perk_img.resize((37, 37))
+				img.paste(perk_img, (second_row_perks_coords, 326), perk_img.convert('RGBA'))
+				second_row_perks_coords += 53
+		second_row_rune_coords = 130
+		for x in range(6, 9):
+			perk_url = perks[x]['perk_icon_url']
+			perk_response = requests.get(f'{LeagueImageCreator.perk_host}{perk_url}', stream=True)
+			if perk_response.status_code == 200:
+				perk_img = Image.open(perk_response.raw)
+				perk_img = perk_img.resize((24, 24))
+				img.paste(perk_img, (second_row_rune_coords, 333), perk_img.convert('RGBA'))
+				second_row_rune_coords += 33
+		summoner_spell_1_response = requests.get(f'{LeagueImageCreator.summoner_spell_host}{summoner["spell_1"]}.png', stream=True)
+		if summoner_spell_1_response.status_code == 200:
+			summoner_spell_img = Image.open(summoner_spell_1_response.raw)
+			summoner_spell_img = summoner_spell_img.resize((37, 37))
+			img.paste(summoner_spell_img, (79, 369), summoner_spell_img.convert('RGBA'))
+		summoner_spell_2_response = requests.get(f'{LeagueImageCreator.summoner_spell_host}{summoner["spell_2"]}.png', stream=True)
+		if summoner_spell_2_response.status_code == 200:
+			summoner_spell_img = Image.open(summoner_spell_2_response.raw)
+			summoner_spell_img = summoner_spell_img.resize((37, 37))
+			img.paste(summoner_spell_img, (132, 369), summoner_spell_img.convert('RGBA'))
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 		return img

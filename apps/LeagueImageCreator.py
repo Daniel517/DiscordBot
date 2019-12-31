@@ -12,7 +12,7 @@ class LeagueImageCreator():
 			img = Image.open(back_img_response.raw)
 			img = img.resize((1920, 1080))
 			for summoner in summoners:
-				summoner_img = LeagueImageCreator.get_summoner_image(summoner)
+				summoner_img = LeagueImageCreator.get_summoner_image_for_live_game(summoner)
 				if summoner['team'] == 100:
 					img.paste(summoner_img, (blue_img_coords, 0), summoner_img.convert('RGBA'))
 					blue_img_coords += 348
@@ -22,7 +22,7 @@ class LeagueImageCreator():
 			img.save(f'./{game_id}.png')
 		return f'./{game_id}.png'
 
-	def get_summoner_image(summoner):
+	def get_summoner_image_for_live_game(summoner):
 		summoner_name = summoner['name']
 		champ = summoner['champ_name']
 		mastery = summoner['mastery_points']

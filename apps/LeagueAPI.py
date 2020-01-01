@@ -18,10 +18,10 @@ class LeagueAPI():
 		if summoner_data.status_code == 200:
 			return summoner_data.json()
 		elif summoner_data.status_code == 404:
-			print(f'Error getting summoner data, code: {summoner_data.status_code}')
+			#print(f'Error getting summoner data, code: {summoner_data.status_code}')
 			return {'error' : f'Summoner "{username}" not found!'}
 		else:
-			print(f'Error getting summoner data, code: {summoner_data.status_code}')
+			#print(f'Error getting summoner data, code: {summoner_data.status_code}')
 			return {'error' : 'An error occurred!'}
 
 	def get_summoner_data(account_id):
@@ -51,7 +51,7 @@ class LeagueAPI():
 			sorted_roles = {k: v for k, v in sorted(roles_played.items(), key=lambda item: item[1], reverse=True)}
 			return [sorted_champs, sorted_roles]
 		else:
-			print(f'Error getting summoner match data, code: {summoner_rank.status_code}')
+			#print(f'Error getting summoner match data, code: {summoner_rank.status_code}')
 			return {'error' : 'An error occurred!'}
 
 	def get_live_match_data(summoner_id):
@@ -76,10 +76,10 @@ class LeagueAPI():
 				banned_champs.append(banned_champ)
 			return {'game_type': LeagueAPI.get_mode_from_data(summoner_live_data), 'game_id' : summoner_live_data['gameId'],'summoners': summoners, 'banned_champs' : banned_champs}
 		elif summoner_live_data_response.status_code == 404:
-			print(f'Error getting summoner match data, code: {summoner_live_data_response.status_code}')
+			#print(f'Error getting summoner match data, code: {summoner_live_data_response.status_code}')
 			return {'error' : 'No live match found!'}
 		else:
-			print(f'Error getting summoner match data, code: {summoner_live_data_response.status_code}')
+			#print(f'Error getting summoner match data, code: {summoner_live_data_response.status_code}')
 			return {'error' : 'An error occurred!'}
 
 	def get_summoner_rank_data(summoner_id):
@@ -98,7 +98,7 @@ class LeagueAPI():
 				ranked_data.append(queue_data)
 			return ranked_data
 		else:
-			print(f'Error getting summoner rank data, code: {summoner_rank.status_code}')
+			#print(f'Error getting summoner rank data, code: {summoner_rank.status_code}')
 			return {'error' : 'An error occurred!'}
 
 	def get_rank_from_queue_id(summoner_id, queue_id):
@@ -138,7 +138,7 @@ class LeagueAPI():
 				if queue['queueId'] == queue_id:
 					return queue['description'][:-6]
 		else:
-			print(f'Error getting summoner match data, code: {summoner_live_data.status_code}')
+			#print(f'Error getting summoner match data, code: {summoner_live_data.status_code}')
 			return 'Error occurred getting mode from queueId'
 
 	def get_description_from_mode(game_mode_in):
@@ -147,7 +147,7 @@ class LeagueAPI():
 				if game_mode['gameMode'] == game_mode_in:
 					return game_mode['description'][:-6]
 		else:
-			print(f'Error getting summoner match data, code: {summoner_live_data.status_code}')
+			#print(f'Error getting summoner match data, code: {summoner_live_data.status_code}')
 			return 'Error occurred getting description from game mode'
 
 	def get_mastery_points(summoner_id, champ_id):
@@ -165,7 +165,7 @@ class LeagueAPI():
 					perk_path = perk['iconPath'].split('perk-images/')[1]
 					return {'perk_id' : perk_id, 'perk_name' : perk['name'], 'perk_icon_url' : perk_path}
 		else:
-			print(f'Error getting perk info, code: {response_perks.status_code}')
+			#print(f'Error getting perk info, code: {response_perks.status_code}')
 			return {'error' : 'Error getting perk info'}
 
 	def get_summoner_spell_name_from_id(spell_id):

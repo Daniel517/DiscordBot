@@ -7,6 +7,9 @@ import Credentials
 
 client = commands.Bot(command_prefix = "!")
 
+# Riot notice line (insert to custom help when created)
+#'SecretBot isn’t endorsed by Riot Games and doesn’t reflect the views \nor opinions of Riot Games or anyone officially involved in producing or \nmanaging League of Legends. League of Legends and Riot Games are \ntrademarks or registered trademarks of Riot Games, Inc. League of \nLegends © Riot Games, Inc.'
+
 @client.event
 async def on_ready():
 	print('Bot is ready!')
@@ -20,18 +23,6 @@ async def ping(ctx):
 async def clear(ctx, amount=10):
 	""""Clears given amount of messages, default value is 5. Command call is also deleted."""
 	await ctx.channel.purge(limit=amount + 1)
-
-@client.command()
-async def snake(ctx, user: User):
-	"""Return a snake message to user which is included in the command. Must @ a user after command"""
-	str_to_return = ''
-	if user.id == 155410773898821632:
-		str_to_return = 'is not a snake!'
-	elif user.id == 611075817316810783 or ctx.author.id == 611075817316810783:
-		str_to_return = 'is a snake! :snake::snake::snake::snake::snake: AND A GHOSTER! :ghost::ghost::ghost::ghost:'
-	else:
-		str_to_return = 'is a snake! :snake::snake::snake::snake::snake:'
-	await ctx.send(f'{user.mention} {str_to_return}')
 
 @client.command()
 async def load(ctx, extension):

@@ -22,8 +22,8 @@ class LeagueImageCreator():
 				else:
 					img.paste(summoner_img, (red_img_coords, 575), summoner_img.convert('RGBA'))
 					red_img_coords += 348
-			img.save(f'./{game_id}.png')
-		return f'./{game_id}.png'
+			img.save(f'./imgs/{game_id}.png')
+		return f'./imgs/{game_id}.png'
 
 	def get_summoner_image_for_live_game(summoner):
 		summoner_name = summoner['name']
@@ -34,8 +34,8 @@ class LeagueImageCreator():
 		img = Image.new('RGBA', (248, 505), (255, 255, 0, 0))
 		#Check if font folder is available
 		try: 
-			font_summoner_name = ImageFont.truetype('open-sans/OpenSans-Regular.ttf', 28)
-			font_summoner_data = ImageFont.truetype('open-sans/OpenSans-Bold.ttf', 18)
+			font_summoner_name = ImageFont.truetype('staticdata/open-sans/OpenSans-Regular.ttf', 28)
+			font_summoner_data = ImageFont.truetype('staticdata/open-sans/OpenSans-Bold.ttf', 18)
 		except:
 			font_summoner_name = ImageFont.load_default()
 			font_summoner_data = ImageFont.load_default()
@@ -47,10 +47,11 @@ class LeagueImageCreator():
 			banner_img = banner_img.crop((0, 323, banner_img.size[0], 828))
 			img.paste(banner_img, (0, 0))
 		#Check if response of trim for summoner's rank is valid
-		trim_response = requests.get(f'http://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/assets/regalia/banners/trims/trim_{summoner["rank_data"]["rank"]}.png', stream=True)
-		if trim_response.status_code == 200:
-			trim_img = Image.open(trim_response.raw)
-			trim_img = trim_img.resize((248, 124))
+		if summoner["rank_data"]:
+			trim_response = requests.get(f'http://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/assets/regalia/banners/trims/trim_{summoner["rank_data"]["rank"]}.png', stream=True)
+			if trim_response.status_code == 200:
+				trim_img = Image.open(trim_response.raw)
+				trim_img = trim_img.resize((248, 124))
 			img.paste(trim_img, (0, 381), trim_img.convert('RGBA'))
 		#Adds summoner name to image
 		summoner_font_place = (img.size[0] / 2) - (font_summoner_name.getsize(summoner_name)[0] / 2)
@@ -69,11 +70,12 @@ class LeagueImageCreator():
 		mastery_font_place = 185 - (font_summoner_data.getsize(f'{mastery}')[0] / 2)
 		mastery_data_text.text((mastery_font_place, 200), f'{mastery}', fill='#D3D3D3', align='center', font=font_summoner_data)
 		#Adds Winrate label and data to image
+		win_rate = f'{summoner["rank_data"]["win_rate"]}%' if summoner["rank_data"] else 'N/A'
 		win_rate_title_text = ImageDraw.Draw(img)
 		win_rate_title_text.text((32, 239), 'Winrate:', fill='#FFE553', align='center', font=font_summoner_data)
 		win_rate_data_text = ImageDraw.Draw(img)
-		win_rate_font_place = 185 - (font_summoner_data.getsize(f'{summoner["rank_data"]["win_rate"]}%')[0] / 2)
-		win_rate_data_text.text((win_rate_font_place, 239), f'{summoner["rank_data"]["win_rate"]}%', fill='#D3D3D3', align='center', font=font_summoner_data)
+		win_rate_font_place = 185 - (font_summoner_data.getsize(win_rate)[0] / 2)
+		win_rate_data_text.text((win_rate_font_place, 239), win_rate, fill='#D3D3D3', align='center', font=font_summoner_data)
 		first_row_perks_coords = 26
 		perks = summoner['perks']
 		for x in range(4):
@@ -112,23 +114,5 @@ class LeagueImageCreator():
 			summoner_spell_img = Image.open(summoner_spell_2_response.raw)
 			summoner_spell_img = summoner_spell_img.resize((37, 37))
 			img.paste(summoner_spell_img, (132, 369), summoner_spell_img.convert('RGBA'))
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 		return img
+		

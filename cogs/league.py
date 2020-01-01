@@ -51,7 +51,7 @@ class League(commands.Cog):
 	async def live(self, ctx, username):
 		"""Returns data of live game if summoner is in one"""
 		summoner_info = lapi.get_summoner_info(username)
-		await ctx.message.channel.send(file = discord.File('./load01.gif', 'load.gif'))
+		await ctx.message.channel.send(file = discord.File('./staticdata/load01.gif', 'load.gif'))
 		if 'error' in summoner_info:
 			await ctx.send(summoner_info['error'])
 			return
@@ -61,7 +61,7 @@ class League(commands.Cog):
 				await ctx.channel.purge(limit=1)
 				await ctx.send(summoner_live_data['error'])
 				return
-			elif os.path.exists(f'./{summoner_live_data["game_id"]}.png'):
+			elif os.path.exists(f'./imgs/{summoner_live_data["game_id"]}.png'):
 				await ctx.channel.purge(limit=1)
 				await ctx.message.channel.send(file = discord.File(f'./{summoner_live_data["game_id"]}.png', 'match.png'))
 			elif summoner_live_data:

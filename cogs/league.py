@@ -22,7 +22,7 @@ class League(commands.Cog):
 			return
 		elif summoner_info:
 			embed.set_author(name=f'{username} #{summoner_info["summonerLevel"]}', icon_url=f'http://ddragon.leagueoflegends.com/cdn/9.24.2/img/profileicon/{summoner_info["profileIconId"]}.png')
-		summoner_rank = lapi.get_summoner_rank(summoner_info['id'])
+		summoner_rank = lapi.get_summoner_rank_data(summoner_info['id'])
 		if 'error' in summoner_rank:
 			await ctx.send(summoner_rank['error'])
 			return

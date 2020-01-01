@@ -63,7 +63,7 @@ class League(commands.Cog):
 				return
 			elif os.path.exists(f'./imgs/{summoner_live_data["game_id"]}.png'):
 				await ctx.channel.purge(limit=1)
-				await ctx.message.channel.send(file = discord.File(f'./{summoner_live_data["game_id"]}.png', 'match.png'))
+				await ctx.message.channel.send(file = discord.File(f'./imgs/{summoner_live_data["game_id"]}.png', 'match.png'))
 			elif summoner_live_data:
 				image_path = LeagueImageCreator.get_match_image(summoner_live_data['game_id'], summoner_live_data['summoners'], summoner_live_data['banned_champs'])
 				await ctx.channel.purge(limit=1)

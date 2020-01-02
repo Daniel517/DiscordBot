@@ -21,9 +21,9 @@ async def help(ctx):
 	embed = discord.Embed(description='Below Are All The Commands For SecretBot')
 	embed.set_author(name='SecretBot Help Center')
 	embed.add_field(name='***`!ping`***', value='Returns the bot latency', inline=False)
-	embed.add_field(name='***`!clear`***', value='Clears the given amount of messages(default 10) \n***i.e. !clear 10***', inline=False)
-	embed.add_field(name='***`!live`***', value='Shows an image with data from a live League of Legends game \nIf there are spaces in name, replace spce with underscore \n***i.e. !live Test_Summoner_Name***', inline=False)
-	embed.add_field(name='***`!league`***', value='Shows an image with data of a summoner \nIf there are spaces in name, replace spce with underscore \n***i.e. !league Test_Summoner_Name***', inline=False)
+	embed.add_field(name='***`!clear`***', value='Deletes the given amount of messages(default 10) \n***i.e. !clear 20***', inline=False)
+	embed.add_field(name='***`!live`***', value='Shows an image with data from a live League of Legends game \n***i.e. !live Test Summoner Name***', inline=False)
+	embed.add_field(name='***`!league`***', value='Shows an image with data of a summoner \nFor multiple summoners, split by commas \n***i.e. !league Test_Summoner_Name***', inline=False)
 	embed.set_footer(text='SecretBot isn’t endorsed by Riot Games and doesn’t reflect the views or opinions of Riot Games or anyone officially involved in producing or managing League of Legends. League of Legends and Riot Games are trademarks or registered trademarks of Riot Games, Inc. League of Legends © Riot Games, Inc.')
 	await ctx.send(embed=embed)
 

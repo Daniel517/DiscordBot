@@ -24,10 +24,11 @@ class League(commands.Cog):
 	# PASS IMG PASS INSTEAD OF GAME ID? PATH DECLARE BEFORE SECOND ERROR AND CHECKED IN ELIF OR USED IN SENDING BACK IMG
 	#Returns image containing data of live game if summoner is in one
 	@commands.command()
-	async def live(self, ctx, summoner_name):
+	async def live(self, ctx, *summoner_name):
+		summoner_name_str = " ".join(summoner_name)
 		# Sends a loading gif for users to know command is being processed
 		await ctx.message.channel.send(file = discord.File('./staticdata/load01.gif', 'load.gif'))
-		summoner_account_data = LeagueAPI.get_summoner_account_info(summoner_name)
+		summoner_account_data = LeagueAPI.get_summoner_account_info(summoner_name_str)
 		try:
 			#Checks if there was an error getting summoner account data
 			if 'error' in summoner_account_data:

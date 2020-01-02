@@ -14,13 +14,20 @@ class League(commands.Cog):
 	def __init__(self, client):
 		self.client = client
 
-	# PASS IMG PASS INSTEAD OF GAME ID? PATH DECLARE BEFORE SECOND ERROR AND CHECKED IN ELIF OR USED IN SENDING BACK IMG
+	#Returns image containing summoner data
 	@commands.command()
-	async def live(self, ctx, username):
-		"""Returns data of live game if summoner is in one"""
+	async def league(self, ctx, *summoner_names):
+		summoner_names_str = " ".join(summoner_names)
+		summoner_names_list = summoner_names_str.split(',')
+		await ctx.send(summoner_names_list)
+
+	# PASS IMG PASS INSTEAD OF GAME ID? PATH DECLARE BEFORE SECOND ERROR AND CHECKED IN ELIF OR USED IN SENDING BACK IMG
+	#Returns image containing data of live game if summoner is in one
+	@commands.command()
+	async def live(self, ctx, summoner_name):
 		# Sends a loading gif for users to know command is being processed
 		await ctx.message.channel.send(file = discord.File('./staticdata/load01.gif', 'load.gif'))
-		summoner_account_data = LeagueAPI.get_summoner_account_info(username)
+		summoner_account_data = LeagueAPI.get_summoner_account_info(summoner_name)
 		try:
 			#Checks if there was an error getting summoner account data
 			if 'error' in summoner_account_data:

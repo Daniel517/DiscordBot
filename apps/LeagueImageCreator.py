@@ -49,9 +49,37 @@ class LeagueImageCreator():
 		name_text = ImageDraw.Draw(img)
 		name_text.text((summoner_name_font_place, 284), summoner_name, fill='#ffe553', align='center', font=font_summoner_name)
 		#Add ranked data text
-
+		solo_center_coords = 172
+		flex_center_coords = 404
+		solo_labels = ['Ranked Solo/Duo', 'N/A', 'N/A']
+		solo_label_coord = solo_center_coords - (font_summoner_data_headings.getsize(solo_labels[0])[0] / 2)
+		solo_label_text = ImageDraw.Draw(img)
+		solo_label_text.text((solo_label_coord, 362), solo_labels[0], fill='#d3d3d3', align='center', font=font_summoner_data_headings)
+		flex_labels = ['Ranked Flex', 'N/A', 'N/A']
+		flex_label_coord = flex_center_coords - (font_summoner_data_headings.getsize(flex_labels[0])[0] / 2)
+		flex_label_text = ImageDraw.Draw(img)
+		flex_label_text.text((flex_label_coord, 362), flex_labels[0], fill='#d3d3d3', align='center', font=font_summoner_data_headings)
+		for rank in summoner_card_data['rank_data']:
+			if rank['queue'] == 'Ranked Solo/Duo':
+				solo_labels[1] = rank['rank']
+				solo_labels[2] = f'{rank["games_played"]} ({rank["win_rate"]}%)'
+			elif rank['queue'] == 'Ranked Flex':
+				flex_labels[1] = rank['rank']
+				flex_labels[2] = f'{rank["games_played"]} ({rank["win_rate"]}%)'
+		solo_rank_coord = solo_center_coords - (font_summoner_data_headings.getsize(solo_labels[1])[0] / 2)
+		solo_rank_text = ImageDraw.Draw(img)
+		solo_rank_text.text((solo_rank_coord, 405), solo_labels[1], fill='#15EBFF', align='center', font=font_summoner_data_rank)
+		solo_win_rate_coord = solo_center_coords - (font_summoner_data_headings.getsize(solo_labels[2])[0] / 2)
+		solo_win_rate_text = ImageDraw.Draw(img)
+		solo_win_rate_text.text((solo_win_rate_coord, 442), solo_labels[2], fill='#15EBFF', align='center', font=font_summoner_data_rank)
+		flex_rank_coord = flex_center_coords - (font_summoner_data_headings.getsize(flex_labels[1])[0] / 2)
+		flex_rank_text = ImageDraw.Draw(img)
+		flex_rank_text.text((flex_rank_coord, 405), flex_labels[1], fill='#15EBFF', align='center', font=font_summoner_data_rank)
+		flex_win_rate_coord = flex_center_coords - (font_summoner_data_headings.getsize(flex_labels[2])[0] / 2)
+		flex_win_rate_text = ImageDraw.Draw(img)
+		flex_win_rate_text.text((flex_win_rate_coord, 442), flex_labels[2], fill='#15EBFF', align='center', font=font_summoner_data_rank)
 		#Add 'Top Champions:' text
-		top_champs_label = 'Top Champions:'
+		top_champs_label = 'Top Champions(Pick Rate):'
 		top_champs_font_place = (img.size[0] / 2) - (font_summoner_data_headings.getsize(top_champs_label)[0] / 2)
 		top_champs_text = ImageDraw.Draw(img)
 		top_champs_text.text((top_champs_font_place, 499), top_champs_label, fill='#D3D3D3', align='center', font=font_summoner_data_headings)
@@ -70,7 +98,7 @@ class LeagueImageCreator():
 				pick_rate_text.text((pick_rate_font_place, 628), pick_rate_label, fill='#D3D3D3', align='center', font=font_summoner_data_subtext)
 				champs_played_coords += 105
 		#Add 'Top Roles:' text
-		top_roles_label = 'Top Roles:'
+		top_roles_label = 'Top Roles(Pick Rate):'
 		top_roles_font_place = (img.size[0] / 2) - (font_summoner_data_headings.getsize(top_roles_label)[0] / 2)
 		top_roles_text = ImageDraw.Draw(img)
 		top_roles_text.text((top_roles_font_place, 664), top_roles_label, fill='#D3D3D3', align='center', font=font_summoner_data_headings)

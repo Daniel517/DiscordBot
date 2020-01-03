@@ -19,7 +19,39 @@ class League(commands.Cog):
 	async def league(self, ctx, *summoner_names):
 		summoner_names_str = " ".join(summoner_names)
 		summoner_names_list = summoner_names_str.split(',')
-		await ctx.send(summoner_names_list)
+		# Sends a loading gif for users to know command is being processed
+		await ctx.message.channel.send(file = discord.File('./staticdata/load01.gif', 'load.gif'))
+		summoner_account_data = LeagueAPI.get_summoner_account_info(summoner_names_list[0])
+		if 'error' in summoner_account_data:
+			#Removes loading gif and then returns an error message
+			await ctx.channel.purge(limit=1)
+			await ctx.send(summoner_account_data['error'])
+			return
+		elif summoner_account_data:
+			summoner_card_data = LeagueAPI.get_summoner_card_data(summoner_account_data)
+			if 'error' in summoner_card_data:
+				await ctx.channel.purge(limit=1)
+				await ctx.send(summoner_card_data['error'])
+				return
+			elif os.path.exists(f'./imgs/{summoner_names_list[0]}.png'):
+				await ctx.channel.purge(limit=1)
+				img_path = f'./imgs/{summoner_names_list[0]}.png'
+				await ctx.message.channel.send(file = discord.File(img_path, 'summoner_card.png'))
+				return
+			else:
+				try:
+					image_path = LeagueImageCreator.get_summoner_card(summoner_card_data)
+					#Removes loading gif and then returns the image created
+					await ctx.channel.purge(limit=1)
+					await ctx.message.channel.send(file = discord.File(image_path, 'summoner_card.png'))
+					#Waits 60 seconds to delete img in case command called for same match
+					#CHANGE TO WHILE LOOP AND CHECK EVERY 3 MIN IF GAME STILL GOING ON, IF NOT DELETE IMG
+					await asyncio.sleep(60)
+					os.remove(image_path)
+				except:
+					await ctx.channel.purge(limit=1)
+					await ctx.send('An error occured getting summoner card.')
+				
 
 	# PASS IMG PASS INSTEAD OF GAME ID? PATH DECLARE BEFORE SECOND ERROR AND CHECKED IN ELIF OR USED IN SENDING BACK IMG
 	#Returns image containing data of live game if summoner is in one

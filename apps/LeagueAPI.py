@@ -29,47 +29,19 @@ class LeagueAPI():
 		else:
 			return {'error' : 'An error occurred!'}
 
-	# Gets summoner's top 5 most played champs and top 2 roles in the desired 
-	# amount of past game(default is set to past 100 games), error if getting data
-	def get_summoner_most_played_champs_and_roles(account_id, begin_index=0, end_index=100):
-		#Request url for match history
-		request_url = f'{LeagueAPI.host}/lol/match/v4/matchlists/by-account/{account_id}?endIndex={end_index}&beginIndex={begin_index}'
-		summoner_data = requests.get(request_url, headers = LeagueAPI.headers)
-		#Checks if request was successful
-		if summoner_data.status_code == 200:
-			matches = summoner_data.json()['matches']
-			roles_played = {}
-			champs_played = {}
-			#Iterates through all of the matches
-			for match in matches:
-				champ = match['champion']
-				#Increments champ counter by one if already in dictionary, else it adds champ to dictionary of champs played
-				if champ in champs_played:
-					champs_played[match_champ] += 1
-				else:
-					champs_played.update({match_champ : 1})
-				match_role = match['lane']
-				#Increments role counter by one if already in dictionary
-				if match_role in roles_played:
-					roles_played[match_role] += 1
-				#If lane is bot, checks role to see if summoner is either adc or support
-				elif match_role == 'NONE' or match_role == 'BOTTOM':
-					match_bot_role = match['role']
-					#Increments role counter by one if already in dictionary, else it adds role to dictionary of roles played
-					if match_bot_role in roles_played:
-						roles_played[match_bot_role] += 1
-					else:
-						roles_played.update({match_bot_role : 1})
-				#Adds role to dictionary of roles played
-				else:
-					roles_played.update({match_role : 1})
-			#Sorts champ and roles dictionaries in order of number of times played
-			sorted_champs = {k: v for k, v in sorted(champs_played.items(), key=lambda item: item[1], reverse=True)}
-			sorted_roles = {k: v for k, v in sorted(roles_played.items(), key=lambda item: item[1], reverse=True)}
-			return [sorted_champs, sorted_roles]
-		#
-		else:
-			return {'error' : 'An error occurred getting summoner match history!'}
+	#Gets data for summoner card such as rank and most played champs
+	def get_summoner_card_data(summoner_account_data, begin_index=0, end_index=100):
+		summoner_name = summoner_account_data['name']
+		summoner_icon = summoner_account_data['profileIconId']
+		summoner_id = summoner_account_data['id']
+		summoner_rank_data = LeagueAPI.get_summoner_ranked_solo_flex_data(summoner_id)
+		if 'error' in summoner_rank_data:
+			return summoner_rank_data
+		account_id = summoner_account_data['accountId']
+		most_played_champs_roles = LeagueAPI.get_summoner_most_played_champs_and_roles(account_id, begin_index, end_index)
+		if 'error' in most_played_champs_roles:
+			return most_played_champs_roles
+		return {'summoner_name': summoner_name, 'summoner_icon' : summoner_icon, 'rank_data' : summoner_rank_data, 'most_played_champs' : most_played_champs_roles[0], 'most_played_roles' : most_played_champs_roles[1]}
 
 	#Gets data on a live match given a summoner id such as summoners in match
 	def get_live_match_data(summoner_id):
@@ -113,6 +85,54 @@ class LeagueAPI():
 			return {'error' : 'No live match found!'}
 		else:
 			return {'error' : 'An error occurred getting live match information!'}
+
+	# Gets summoner's top 5 most played champs and top 2 roles in the desired 
+	# amount of past game(default is set to past 100 games), error if getting data
+	def get_summoner_most_played_champs_and_roles(account_id, begin_index, end_index):
+		#Request url for match history
+		request_url = f'{LeagueAPI.host}/lol/match/v4/matchlists/by-account/{account_id}?endIndex={end_index}&beginIndex={begin_index}'
+		summoner_data = requests.get(request_url, headers = LeagueAPI.headers)
+		#Checks if request was successful
+		if summoner_data.status_code == 200:
+			matches = summoner_data.json()['matches']
+			roles_played = {}
+			champs_played = {}
+			#Iterates through all of the matches
+			for match in matches:
+				champ = match['champion']
+				#Increments champ counter by one if already in dictionary, else it adds champ to dictionary of champs played
+				if champ in champs_played:
+					champs_played[champ] += 1
+				else:
+					champs_played.update({champ : 1})
+				match_role = match['lane']
+				#Increments role counter by one if already in dictionary
+				if match_role in roles_played:
+					roles_played[match_role] += 1
+				#If lane is bot, checks role to see if summoner is either adc or support
+				elif match_role == 'NONE' or match_role == 'BOTTOM':
+					match_bot_role = match['role']
+					#Increments role counter by one if already in dictionary, else it adds role to dictionary of roles played
+					if match_bot_role in roles_played:
+						roles_played[match_bot_role] += 1
+					else:
+						roles_played.update({match_bot_role : 1})
+				#Adds role to dictionary of roles played
+				else:
+					roles_played.update({match_role : 1})
+			#Sorts champ and roles dictionaries in order of number of times played
+			sorted_champs = {k: v for k, v in sorted(champs_played.items(), key=lambda item: item[1], reverse=True)}
+			sorted_roles = {k: v for k, v in sorted(roles_played.items(), key=lambda item: item[1], reverse=True)}
+			top_five_champs = dict(list(sorted_champs.items())[0:5])
+			top_two_roles = dict(list(sorted_roles.items())[0:2])
+			#Replaces champ ids with champ names
+			top_five_champs_with_names = {}
+			for champ_id, times_played in top_five_champs.items():
+				top_five_champs_with_names.update({LeagueAPI.get_champ_name_from_id(str(champ_id)) : times_played})
+			return [top_five_champs_with_names, top_two_roles]
+		#
+		else:
+			return {'error' : f'An error occurred getting summoner match history! {summoner_data.status_code}'}
 
 	#Gets ranked solo/duo and flex data given a summoner id
 	def get_summoner_ranked_solo_flex_data(summoner_id):

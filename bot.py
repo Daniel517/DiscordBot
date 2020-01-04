@@ -22,8 +22,8 @@ async def help(ctx):
 	embed.set_author(name='SecretBot Help Center')
 	embed.add_field(name='***`!ping`***', value='Returns the bot latency', inline=False)
 	embed.add_field(name='***`!clear`***', value='Deletes the given amount of messages(default 10) \n***i.e. !clear 20***', inline=False)
-	embed.add_field(name='***`!live`***', value='Shows an image with data from a live League of Legends game \n***i.e. !live Test Summoner Name***', inline=False)
-	embed.add_field(name='***`!league`***', value='Shows an image with data of a summoner \nFor multiple summoners, split by commas \n***i.e. !league Test_Summoner_Name***', inline=False)
+	embed.add_field(name='***`!live`***', value='Shows an image with data from a live League of Legends game \n***i.e. !live NA Test Summoner Name***', inline=False)
+	embed.add_field(name='***`!league`***', value='Shows an image with data of a summoner \nFor multiple summoners, split by commas \n***i.e. !league NA Test_Summoner_Name***', inline=False)
 	embed.set_footer(text='SecretBot isn’t endorsed by Riot Games and doesn’t reflect the views or opinions of Riot Games or anyone officially involved in producing or managing League of Legends. League of Legends and Riot Games are trademarks or registered trademarks of Riot Games, Inc. League of Legends © Riot Games, Inc.')
 	await ctx.send(embed=embed)
 

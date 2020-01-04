@@ -4,8 +4,9 @@ from apps.LeagueImageCreator import LeagueImageCreator
 
 class LeagueAPI():
 
-	#Static variable for use in requests
+	#Default host value set to na server
 	host = 'https://na1.api.riotgames.com'
+	#Riot API token
 	headers = {'X-Riot-Token' : Credentials.riot_token}
 
 	#Responses of requests containing json data(stored and then reused instead of calling every time needed)
@@ -17,7 +18,11 @@ class LeagueAPI():
 	response_summoner_spells = requests.get('http://ddragon.leagueoflegends.com/cdn/9.24.2/data/en_US/summoner.json')
 
 	#Gets top level account data on a given summoner such as summoner id and summoner level
-	def get_summoner_account_info(summoner_name):
+	def get_summoner_account_info(server, summoner_name):
+		server_name_for_url = LeagueAPI.get_riot_server_name(server)
+		if server_name_for_url == 'error':
+			return {'error' : 'Error occurred with entered server.\n***!servers to get a list of all valid Riot servers***'}
+		LeagueAPI.host = f'https://{server_name_for_url}.api.riotgames.com'
 		summoner_account_data = requests.get(f'{LeagueAPI.host}/lol/summoner/v4/summoners/by-name/{summoner_name}', headers = LeagueAPI.headers)
 		#Checks if request was successful
 		if summoner_account_data.status_code == 200:
@@ -27,7 +32,7 @@ class LeagueAPI():
 		elif summoner_account_data.status_code == 404:
 			return {'error' : f'Summoner "{summoner_name}" not found!'}
 		else:
-			return {'error' : 'An error occurred!'}
+			return {'error' : f'An error occurred getting data on "{summoner_name}"!'}
 
 	#Gets data for summoner card such as rank and most played champs
 	def get_summoner_card_data(summoner_account_data, begin_index=0, end_index=100):
@@ -85,6 +90,22 @@ class LeagueAPI():
 			return {'error' : 'No live match found!'}
 		else:
 			return {'error' : 'An error occurred getting live match information!'}
+
+	def get_riot_server_name(server):
+		switcher = {
+			'br' : 'br1',
+			'eun' : 'eun1',
+			'euw' : 'euw1',
+			'jp' : 'jp1',
+			'kr' : 'kr1',
+			'la1' : 'la1',
+			'la2' : 'la2',
+			'na' : 'na1',
+			'oc' : 'oc1',
+			'tr' : 'tr1',
+			'ru' : 'ru'
+		}
+		return switcher.get(server.lower(), 'error')
 
 	# Gets summoner's top 5 most played champs and top 2 roles in the desired 
 	# amount of past game(default is set to past 100 games), error if getting data

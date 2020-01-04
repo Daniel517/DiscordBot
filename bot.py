@@ -16,7 +16,7 @@ async def on_ready():
 	print('Bot is ready!')
 
 @client.command()
-async def help(ctx):
+async def sbothelp(ctx):
 	"""Returns list of possible commands"""
 	embed = discord.Embed(description='Below Are All The Commands For SecretBot')
 	embed.set_author(name='SecretBot Help Center')

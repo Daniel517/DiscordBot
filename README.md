@@ -2,7 +2,7 @@
 Discord Bot for Game Data
 
 ##### Current Commands
-  + [General Commands](#General)
+  + [General Commands](#General Commands)
   + [League of Legends Commands](#League of Legends)
 
 ## Want to Try The Bot?
@@ -19,3 +19,15 @@ Discord Bot for Game Data
   + ***`!clear`***
     - Deletes the given amount of message(default 10)
     - *i.e. !clear 5*
+
+### League of Legends
+  + ***`!live`***
+    - Shows an image with data from a live League of Legends game given a region and summoner name
+    - *i.e. !live NA Summoner Name*
+  + ***`!league`***
+    - Shows an image with data of a summoner given a region and summoner name
+    - *i.e. !league NA Summoner Name*
+  ###### Disclaimer
+  `SecretBot isn’t endorsed by Riot Games and doesn’t reflect the views or opinions of Riot Games
+    or anyone officially involved in producing or managing League of Legends. League of Legends and Riot Games are
+    trademarks or registered trademarks of Riot Games, Inc. League of Legends © Riot Games, Inc.`

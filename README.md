@@ -12,10 +12,10 @@ Discord Bot for Game Data
 [Click Here!](https://discordapp.com/api/oauth2/authorize?client_id=659778088519073793&permissions=8&scope=bot)
 
 ### General Commands
-  + `***!sbothelp***`
+  + ***`!sbothelp`***
     - Displays all the commands available
-  + `***!ping***`
+  + ***`!ping`***
     - Returns the bot latency
-  + `***!clear***`
+  + ***`!clear`***
     - Deletes the given amount of message(default 10)
-    - ***i.e. !clear 5***
+    - *i.e. !clear 5*

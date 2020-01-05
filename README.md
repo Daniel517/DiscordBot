@@ -25,9 +25,13 @@ This application was made to simplify getting data for League of Legends games a
   + ***`!live`***
     - Shows an image with data from a live League of Legends game given a region and summoner name
     - *i.e. !live NA Summoner Name*
+    - An example image of this command is shown below
+    ![Example](imgs/LiveCommand.png)
   + ***`!league`***
     - Shows an image with data of a summoner given a region and summoner name
     - *i.e. !league NA Summoner Name*
+    - An example image of this command is shown below
+    ![Example](imgs/LeagueCommand.png)
 
 ###### Disclaimer
 `SecretBot isn’t endorsed by Riot Games and doesn’t reflect the views or opinions of Riot Games

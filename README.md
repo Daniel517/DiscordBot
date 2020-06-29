@@ -1,4 +1,4 @@
-# DiscordBot
+# SecretBot
 This application was made to simplify getting data for League of Legends games and accounts. The only requirement to run is the Discord App. [Below](#want-to-try-the-bot) are links to join my discord or integrate the bot into your own discord server. If you are interested in contributing to this bot, feel free to message me on Discord(ItsMe#8063)!
 
 ## Current Commands
